@@ -1,0 +1,68 @@
+appName: ExAngular
+appEnv: dev
+namespace: nodejs-dev
+
+storage:
+  pvcName: pv-storage
+
+ingress:
+  mode: http
+  frontend:
+    host: nodejs-dev.test.id
+  backend:
+    host: api.nodejs-dev.test.id
+  tls:
+    enabled: false
+
+image:
+  imagePullSecrets: harbor-secret
+  frontend:
+    repository: harbor.pln.test.id/nodejs/frontend
+    tag: a26a932a
+  backend:
+    repository: harbor.pln.test.id/nodejs/backend
+    tag: a26a932a
+
+app:
+  frontend:
+    name: "ANGULAR"
+    env: "production"
+    api: "api.nodejs-dev.test.id"
+  backend:
+    name: "EXPRESS"
+    env: "production"
+  version: 2023-09-06T04:51:32+00:00
+  key: "al2weeCh8ma4Phi2"
+
+db:
+  connection: "mysql"
+  port: "3306"
+  host: "192.168.0.10"
+  database: "nodejs"
+  username: "nodejs"
+  password: "@nodejs2023"
+  dialect: "mysql"
+
+resources:
+  frontend:
+    requests:
+      cpu:
+      # memory: "256Mi"
+    limits:
+      cpu:
+      # memory: "1024Mi"
+  backend:
+    requests:
+      cpu:
+      # memory: "256Mi"
+    limits:
+      cpu:
+      # memory: "1024Mi"
+
+hpa:
+  frontend:
+    minReplicas:
+    # maxReplicas:
+  backend:
+    minReplicas:
+    # maxReplicas:

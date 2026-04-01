@@ -1,0 +1,61 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend-service
+  namespace: {{ .Values.namespace }}
+  labels:
+    tier: backend
+spec:
+  selector:
+    app: backend
+    tier: backend
+  ports:
+  - protocol: TCP
+    port: 8080
+    targetPort: 8080
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend-deployment
+  namespace: {{ .Values.namespace }}
+  labels:
+    tier: backend
+spec:
+  # replicas: 1
+  selector:
+    matchLabels:
+      app: backend
+      tier: backend
+  template:
+    metadata:
+      labels:
+        app: backend
+        tier: backend
+    spec:
+      volumes:
+        - name: {{ .Values.storage.pvcName }}
+          persistentVolumeClaim:
+            claimName: {{ .Values.storage.pvcName }}
+      containers:
+      - name: backend
+        image: "{{ .Values.image.backend.repository }}:{{ .Values.image.backend.tag }}"
+        imagePullPolicy: Always
+        envFrom:
+          - configMapRef:
+              name: backend-configmap
+          - secretRef:
+              name: backend-secret
+        volumeMounts:
+          - name: {{ .Values.storage.pvcName }}
+            mountPath: /app/public
+            subPath: storage/upload
+        resources:
+          requests:
+            cpu: {{ default "250m" .Values.resources.backend.requests.cpu }}
+            memory: {{ .Values.resources.backend.requests.memory | default "256Mi" }}
+          limits:
+            cpu: {{ .Values.resources.backend.limits.cpu | default "1000m" }}
+            memory: {{ .Values.resources.backend.limits.memory | default "1024Mi" }}
+      imagePullSecrets:
+      - name: {{ .Values.image.imagePullSecrets }}
